@@ -1,28 +1,55 @@
+
+
+
+
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+<div id="app">
+  <div id="nav">
+    <VueHeader />
   </div>
+  <body>
+    <router-view />
+  </body>
+</div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import firebaseApp from "./firebase/init";
+import VueHeader from "./components/VueHeader.vue";
+import { mapGetters, mapActions } from "vuex";
 export default {
-  name: 'App',
+  name: "app",
   components: {
-    HelloWorld
+    VueHeader
+  },
+  methods: {
+    ...mapActions(["updateAdmin"])
+  },
+  computed: mapGetters(["checkAdmin"]),
+  created() {
+    firebaseApp.auth().onAuthStateChanged(user => {
+      if (user) {
+        user.getIdTokenResult().then(getIdTokenResult => {
+          if (getIdTokenResult.claims.admin) {
+            this.updateAdmin(true);
+          } else this.updateAdmin(false);
+        });
+      }
+    });
   }
-}
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+body,
+html {
+  font-family: "montserrat", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+#nav a.router-link-exact-active {
+  background-color: rgb(63, 63, 63);
+  color: #fff;
 }
 </style>
